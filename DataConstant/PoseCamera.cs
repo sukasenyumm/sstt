@@ -7,16 +7,16 @@ public class PoseCamera
     public Vector3 maxPosition;
     public Vector3 minRotation;
     public Vector3 maxRotation;
-    //public float duration;
+    public float duration;
 
-    public PoseCamera(string id, Vector3 minPos, Vector3 maxPos, Vector3 minRot, Vector3 maxRot/*, float dur*/)
+    public PoseCamera(string id, Vector3 minPos, Vector3 maxPos, Vector3 minRot, Vector3 maxRot, float dur)
     {
         identity = id;
         minPosition = minPos;
         maxPosition = maxPos;
         minRotation = minRot;
         maxRotation = maxRot;
-        //duration = dur;
+        duration = dur;
     }
 
 }

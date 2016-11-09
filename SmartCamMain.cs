@@ -16,17 +16,19 @@ public class SmartCamMain : MonoBehaviour
     private int counterPain = 0;
     private string counterId;
     public int poseTolerance = 2;
-    public float duration;
+    public float duration = 2f;
     public string executionTime = "Initialize..";
-    TruePoseCamera fixPose;
+    private float tempduration;
+    //TruePoseCamera fixPose;
 
     // Use this for initialization
     void Start()
     {
         anim = GetComponent<Animator>();
         counterId = initialId;
-        fixPose = FindTruePose(initialId);
-        duration = FindDuration(initialId);
+        //fixPose = FindTruePose(initialId);
+        tempduration = duration;
+        duration = tempduration;
         GameObject.FindGameObjectWithTag("text pose").GetComponent<Text>().text = "Id Pose : " + initialId + "\n"
                                                                                          + "Duration : " + duration + "\n"
                                                                                          + "Execution Time : -";
@@ -40,7 +42,7 @@ public class SmartCamMain : MonoBehaviour
             duration -= Time.deltaTime;
             GameObject.FindGameObjectWithTag("text duration").GetComponent<Text>().text = "Current Duration : " + duration.ToString();
             
-            if (duration < 0)
+            if (duration <= 0)
             {
                 //Debug.Log(transform.rotation);
                 //TEMPORARY Bugfix FORCE rotation to {0,1,0,1}
@@ -59,12 +61,13 @@ public class SmartCamMain : MonoBehaviour
 
                 initialId = GetNamePose(initialId, poseRange, hasilPosGenerated, hasilRotGenerated);
                 //with find true pose
-                fixPose = FindTruePose(initialId);
-                initialId = fixPose.identity;
+                //fixPose = FindTruePose(initialId);
+                //initialId = fixPose.identity;
 
                 //Debug.Log(initialId);
-                duration = fixPose.duration;
+                //duration = fixPose.duration;
                 //Debug.Log("Duration" + duration);
+                duration = tempduration;
 
                 stopWatch.Stop();
                 System.TimeSpan ts = stopWatch.Elapsed;
@@ -94,8 +97,8 @@ public class SmartCamMain : MonoBehaviour
                 else
                     GameObject.FindGameObjectWithTag("text pose").GetComponent<Text>().color = new Color(0, 253, 243);
 
-                smartCam.transform.rotation = Quaternion.Euler(fixPose.rotation + transform.rotation.eulerAngles);
-                smartCam.transform.position = new Vector3(fixPose.position.z * transform.forward.x, fixPose.position.y, fixPose.position.z * transform.forward.z) + transform.position;
+                smartCam.transform.rotation = Quaternion.Euler(hasilRotGenerated + transform.rotation.eulerAngles);
+                smartCam.transform.position = new Vector3(hasilPosGenerated.z * transform.forward.x, hasilPosGenerated.y, hasilPosGenerated.z * transform.forward.z) + transform.position;
             
             }
            
@@ -116,10 +119,10 @@ public class SmartCamMain : MonoBehaviour
         {
             float fr = an.GetFloat("Forward");
             bool isGround = an.GetBool("OnGround");
-            //float tr = an.GetFloat("Turn");
+            float tr = an.GetFloat("Turn");
             //Debug.Log(fr);
 
-            if (fr > -0.01f && fr < 0.01f && isGround/* && tr > -0.01f && tr < 0.01f*/)
+            if (fr > -0.01f && fr < 0.01f && isGround && tr > -0.01f && tr < 0.01f)
             {
                 res = true;
                 //Debug.Log("Idle");
@@ -157,7 +160,7 @@ public class SmartCamMain : MonoBehaviour
                 if (trigger == true)
                 {
                     result = pose[i].identity;
-                    //initDuration = pose[i].duration;
+                    tempduration = pose[i].duration;
                 }
                 trigger = true;
             }
@@ -271,33 +274,33 @@ public class SmartCamMain : MonoBehaviour
         }
     }
 
-    TruePoseCamera FindTruePose(string currId)
-    {
-        TruePoseCamera result = DataCamera.poseFix[0];
-        for (int i = 0; i < DataCamera.poseFix.Length; i++)
-        {
-            if (currId == DataCamera.poseFix[i].identity)
-            {
-                result = DataCamera.poseFix[i];
-                break;
-            }
-        }
-        return result;
-    }
+    //TruePoseCamera FindTruePose(string currId)
+    //{
+    //    TruePoseCamera result = DataCamera.poseFix[0];
+    //    for (int i = 0; i < DataCamera.poseFix.Length; i++)
+    //    {
+    //        if (currId == DataCamera.poseFix[i].identity)
+    //        {
+    //            result = DataCamera.poseFix[i];
+    //            break;
+    //        }
+    //    }
+    //    return result;
+    //}
 
-    float FindDuration(string currId)
-    {
-        float result = 0f;
-        for (int i = 0; i < DataCamera.poseFix.Length; i++)
-        {
-            if (currId == DataCamera.poseFix[i].identity)
-            {
-                result = DataCamera.poseFix[i].duration;
-                break;
-            }
-        }
-        return result;
-    }
+    //float FindDuration(string currId)
+    //{
+    //    float result = 0f;
+    //    for (int i = 0; i < DataCamera.poseFix.Length; i++)
+    //    {
+    //        if (currId == DataCamera.poseFix[i].identity)
+    //        {
+    //            result = DataCamera.poseFix[i].duration;
+    //            break;
+    //        }
+    //    }
+    //    return result;
+    //}
     void OnAnimatorMove()
     {
 
