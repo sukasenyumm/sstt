@@ -21,6 +21,17 @@ public class SmartCamMain : MonoBehaviour
     private float tempduration;
     //TruePoseCamera fixPose;
 
+    //public static float theActualFunction(int[] values)
+    //{
+    //    if (values.GetLength(0) != 1)
+    //        throw new ArgumentOutOfRangeException("should only have 1 args");
+    //    float result;
+    //    float x = (float)values[0];
+    //    result = 1f / (x + 1f);
+
+    //    return result;
+    //}
+
     // Use this for initialization
     void Start()
     {
@@ -32,6 +43,16 @@ public class SmartCamMain : MonoBehaviour
         GameObject.FindGameObjectWithTag("text pose").GetComponent<Text>().text = "Id Pose : " + initialId + "\n"
                                                                                          + "Duration : " + duration + "\n"
                                                                                          + "Execution Time : -";
+        //Check Genome
+        //Genome x = new Genome(counterId);
+        //float[] gen = x.Genes;
+        //bool[] haha = x.BinaryGenes;
+        //x.ComputeObjectiveFunction();
+
+        GeneticAlgo GA = new GeneticAlgo(counterId);
+        GA.Compute();
+
+        //Debug.Log("Objective= " + x.ObjectiveResult);
     }
 
     // Update is called once per frame

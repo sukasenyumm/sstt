@@ -9,6 +9,8 @@ public class PoseCamera
     public Vector3 maxRotation;
     public float duration;
 
+    public PoseCamera()
+    { }
     public PoseCamera(string id, Vector3 minPos, Vector3 maxPos, Vector3 minRot, Vector3 maxRot, float dur)
     {
         identity = id;
