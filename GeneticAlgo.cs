@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System;
+using System.IO;
 
 public class GeneticAlgo  {
    // public delegate float GAFunction(int[] values);
@@ -125,6 +126,29 @@ public class GeneticAlgo  {
         CreateGenomes(poseId);
         RankPopulation();
 
+        StreamWriter outputFitness = null;
+        bool write = false;
+        if (strFitness != "")
+        {
+            write = true;
+            outputFitness = new StreamWriter(strFitness);
+        }
+
+        for (int i = 0; i < generationSize; i++)
+        {
+            CreateNextGeneration();
+            RankPopulation();
+            if (write)
+            {
+                if (outputFitness != null)
+                {
+                    double d = (double)((Genome)thisGeneration[populationSize - 1]).Fitness;
+                    outputFitness.WriteLine("{0},{1}", i, d);
+                }
+            }
+        }
+        if (outputFitness != null)
+            outputFitness.Close();
     }
     //Ciptakan Genome-genome
     private void CreateGenomes(string Id)
@@ -157,6 +181,78 @@ public class GeneticAlgo  {
             fitness += ((Genome)thisGeneration[i]).Fitness;
             fitnessTable.Add((double)fitness);
         }
+ 
     }
-	
+
+    private void CreateNextGeneration()
+    {
+        nextGeneration.Clear();
+        Genome g = null;
+
+        for (int i = 0; i < populationSize; i += 2)
+        {
+            int pidx1 = RouletteSelection();
+            int pidx2 = RouletteSelection();
+            Genome parent1, parent2, child1, child2;
+            parent1 = ((Genome)thisGeneration[pidx1]);
+            parent2 = ((Genome)thisGeneration[pidx2]);
+
+            if (UnityEngine.Random.value < crossoverRate)
+            {
+                parent1.Crossover(ref parent2, out child1, out child2);
+            }
+            else
+            {
+                child1 = parent1;
+                child2 = parent2;
+            }
+            //child1.Mutate();
+            //child2.Mutate();
+
+            nextGeneration.Add(child1);
+            nextGeneration.Add(child2);
+        }
+
+        thisGeneration.Clear();
+        for (int i = 0; i < populationSize; i++)
+            thisGeneration.Add(nextGeneration[i]);
+    }
+
+    private int RouletteSelection()
+    {
+        double randomFitness = UnityEngine.Random.value* totalFitness;
+        int idx = -1;
+        int mid;
+        int first = 0;
+        int last = populationSize - 1;
+        mid = (last - first) / 2;
+
+        //  ArrayList's BinarySearch is for exact values only
+        //  so do this by hand.
+        while (idx == -1 && first <= last)
+        {
+            if (randomFitness < (double)fitnessTable[mid])
+            {
+                last = mid;
+            }
+            else if (randomFitness > (double)fitnessTable[mid])
+            {
+                first = mid;
+            }
+            mid = (first + last) / 2;
+            //  lies between i and i+1
+            if ((last - first) == 1)
+                idx = last;
+        }
+        return idx;
+    }
+
+    public void GetBest(out float[] values, out float fitness, out string idPose)
+    {
+        Genome g = ((Genome)thisGeneration[populationSize - 1]);
+        values = new float[6];
+        g.GetValues(ref values);
+        fitness = g.Fitness;
+        idPose = g.PoseId;
+    }
 }

@@ -52,6 +52,15 @@ public class SmartCamMain : MonoBehaviour
         GeneticAlgo GA = new GeneticAlgo(counterId);
         GA.Compute();
 
+        float[] values;
+        float fitness;
+        string id;
+        GA.GetBest(out values, out fitness,out id);
+        Debug.Log("Best :"+ fitness+" with ID: "+id);
+        for (int i = 0; i < values.Length; i++)
+            Debug.Log("," + values[i]);
+
+        
         //Debug.Log("Objective= " + x.ObjectiveResult);
     }
 

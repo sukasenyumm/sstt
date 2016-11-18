@@ -5,12 +5,17 @@ using System.Collections.Generic;
 public class Genome{
 
     private const int numLength = 6;
-    //definisi gen posisi dan rotasi
-    private float[] genes;
-    public float[] Genes
+    //definisi pose ID sebelumnya
+    private string poseId;
+    public string PoseId
     {
-        get { return genes; }
-        
+        get { return poseId; }
+    }
+    //definisi gen posisi dan rotasi
+    public float[] genes;
+    public float[] Genes()
+    {
+        return genes;
     }
 
     //definisi gen binary
@@ -63,7 +68,18 @@ public class Genome{
     {
         CreateGenes(idPose);
     }
-   
+
+    public Genome(string idPose, bool createGenes)
+    {
+        poseId = idPose;
+        if (createGenes)
+            CreateGenes(idPose);
+    }
+    public Genome(ref float[] ggenes)
+    {
+        for (int i = 0; i < 6; i++)
+            genes[i] = ggenes[i];
+    }
     //Mulai buat Gen/Kromosom
     private void CreateGenes(string initialId)
     {
@@ -75,7 +91,8 @@ public class Genome{
                 hasilRotGenerated.x, hasilRotGenerated.y,hasilRotGenerated.z,
                 };
 
-        string lockedId = GetLockPoseId(initialId, poseRange);
+        poseId = GetLockPoseId(initialId, poseRange);
+        //poseId = lockedId;
         CreateBinaryGenes();
     }
 
@@ -193,7 +210,7 @@ public class Genome{
 
         for (int i = 0; i < pose.Length; i++)
         {
-            if (i == (randomedLock + 1))
+            if (i == (randomedLock))
             {
                 lockPose = pose[i];
                 result = pose[i].identity;
@@ -215,6 +232,35 @@ public class Genome{
 
         objectiveResult = 6 - count;
         fitness = 1f / (objectiveResult + 1f);
+    }
+
+    public void Crossover(ref Genome genome2, out Genome child1, out Genome child2)
+    {
+        int pos = (int)(Random.value * 6);
+        child1 = new Genome(genome2.PoseId, false);
+        child2 = new Genome(genome2.PoseId, false);
+        child1.genes = new float[6];
+        child2.genes = new float[6];
+
+        for (int i = 0; i < 6; i++)
+        {
+            if (i < pos)
+            {
+                child1.genes[i] = genes[i];
+                child2.genes[i] = genome2.genes[i];
+            }
+            else
+            {
+                child1.genes[i] = genome2.genes[i];
+                child2.genes[i] = genes[i];
+            }
+        }
+    }
+
+    public void GetValues(ref float[] values)
+    {
+        for (int i = 0; i < 6; i++)
+            values[i] = genes[i];
     }
 
 }
