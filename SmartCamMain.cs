@@ -1,8 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections;
-#if UNITY_EDITOR
-using UnityEditor.Animations;
-#endif
 using System.Collections.Generic;
 using UnityEngine.UI;
 
@@ -19,54 +16,34 @@ public class SmartCamMain : MonoBehaviour
     public float duration = 2f;
     public string executionTime = "Initialize..";
     private float tempduration;
-    //TruePoseCamera fixPose;
 
-    //public static float theActualFunction(int[] values)
-    //{
-    //    if (values.GetLength(0) != 1)
-    //        throw new ArgumentOutOfRangeException("should only have 1 args");
-    //    float result;
-    //    float x = (float)values[0];
-    //    result = 1f / (x + 1f);
-
-    //    return result;
-    //}
-
-    // Use this for initialization
+    public string fitnessFile = "";
+    public int generations = 20;
+    public int populationSize = 20; 
+    public float mutationRate = 0.05f;
+    public float crossoverRate = 0.8f;
+    public bool elitism = false;
+             
     void Start()
     {
         anim = GetComponent<Animator>();
         counterId = initialId;
-        //fixPose = FindTruePose(initialId);
         tempduration = duration;
         duration = tempduration;
         GameObject.FindGameObjectWithTag("text pose").GetComponent<Text>().text = "Id Pose : " + initialId + "\n"
                                                                                          + "Duration : " + duration + "\n"
-                                                                                         + "Execution Time : -";
-        //Check Genome
-        //Genome x = new Genome(counterId);
-        //float[] gen = x.Genes;
-        //bool[] haha = x.BinaryGenes;
-        //x.ComputeObjectiveFunction();
-
-        GeneticAlgo GA = new GeneticAlgo(counterId);
-        GA.Compute();
-
-        float[] values;
-        float fitness;
-        string id;
-        GA.GetBest(out values, out fitness,out id);
-        Debug.Log("Best :"+ fitness+" with ID: "+id);
-        for (int i = 0; i < values.Length; i++)
-            Debug.Log("," + values[i]);
-
-        
-        //Debug.Log("Objective= " + x.ObjectiveResult);
+                                                                                         + "Execution Time : -" + "\n"
+                                                                                         + "Fitnes : -";
     }
 
     // Update is called once per frame
     void Update()
     {
+        float[] values;
+        float fitness;
+        string id;
+        Vector3 hasilPosGenerated = Vector3.zero;
+        Vector3 hasilRotGenerated = Vector3.zero;
         if (IsStandBy(anim))
         {
             duration -= Time.deltaTime;
@@ -74,30 +51,30 @@ public class SmartCamMain : MonoBehaviour
             
             if (duration <= 0)
             {
-                //Debug.Log(transform.rotation);
-                //TEMPORARY Bugfix FORCE rotation to {0,1,0,1}
-                //if (transform.rotation.x != 0.1f || transform.rotation.z != 0.1f)
-                //{
-                //    transform.rotation = Quaternion.Euler(0f, 1f, 0f);
-                //}
-
                 System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
                 stopWatch.Start();
-                PoseCamera[] poseRange = ChooseRule(initialId);
 
+                GeneticAlgo GA = new GeneticAlgo(counterId);
+                GA.Generations = generations;
+                GA.MutationRate = mutationRate;
+                GA.CrossoverRate = crossoverRate;
+                GA.FitnessFile = @fitnessFile;
+                GA.Elitism = elitism;
+                GA.PopulationSize = populationSize; 
+                GA.Compute();
 
-                Vector3 hasilPosGenerated = GeneratePosition(poseRange);
-                Vector3 hasilRotGenerated = GenerateRotation(poseRange);
+                GA.GetBest(out values, out fitness, out id, out duration);
 
-                initialId = GetNamePose(initialId, poseRange, hasilPosGenerated, hasilRotGenerated);
-                //with find true pose
-                //fixPose = FindTruePose(initialId);
-                //initialId = fixPose.identity;
-
-                //Debug.Log(initialId);
-                //duration = fixPose.duration;
-                //Debug.Log("Duration" + duration);
-                duration = tempduration;
+                while (fitness != 1.0f)
+                {
+                    GA.Compute();
+                    GA.GetBest(out values, out fitness, out id, out duration);
+                }
+               
+                hasilPosGenerated = new Vector3(values[0], values[1], values[2]);
+                hasilRotGenerated = new Vector3(values[3], values[4], values[5]);
+               
+                initialId = id;
 
                 stopWatch.Stop();
                 System.TimeSpan ts = stopWatch.Elapsed;
@@ -107,19 +84,11 @@ public class SmartCamMain : MonoBehaviour
 
                 GameObject.FindGameObjectWithTag("text pose").GetComponent<Text>().text = "Id Pose : " + initialId + "\n"
                                                                                          + "Duration : " + duration + "\n"
-                                                                                         + "Execution Time : " + executionTime;
-                // Indicator same pose more than 3 times.
-                if (counterId == initialId)
-                {
-                    counterPain += 1;
-                }
-                else
-                {
-                    counterPain = 0;
-                    counterId = initialId;
-                }
-                //Debug.Log(counterPain.ToString());
-                if (counterPain >= poseTolerance)
+                                                                                         + "Execution Time : " + executionTime + "\n"
+                                                                                         + "Fitness : "+fitness.ToString();
+                counterId = initialId;
+                
+                if (ts.Milliseconds > 50)
                 {
                     GameObject.FindGameObjectWithTag("text pose").GetComponent<Text>().color = new Color(255, 0, 0);
                     initialId = BreakRule(initialId);
@@ -176,120 +145,6 @@ public class SmartCamMain : MonoBehaviour
             case "LS-D-HA": return DataCamera.poseRangeFromLSDHA;
             default: return DataCamera.poseRangeFromCUDAE;
         }
-
-    }
-    string GetNamePose(string nameId, PoseCamera[] pose, Vector3 generatedPosValue, Vector3 generatedRotValue)
-    {
-        string result = nameId;
-        bool trigger = false;
-        for (int i = 0; i < pose.Length; i++)
-        {
-            if (trigger == false)
-            {
-                trigger = IsValidRule(nameId, pose[i], generatedPosValue, generatedRotValue);
-                if (trigger == true)
-                {
-                    result = pose[i].identity;
-                    tempduration = pose[i].duration;
-                }
-                trigger = true;
-            }
-        }
-
-        return result;
-    }
-    bool IsValidRule(string currentId, PoseCamera target, Vector3 generatedPosValue, Vector3 generatedRotValue)
-    {
-        bool result = false;
-        if (currentId == target.identity)
-        {
-            result = false;
-        }
-        else
-        {
-            if (((generatedPosValue.x >= target.minPosition.x) && (generatedPosValue.x <= target.maxPosition.x) &&
-                (generatedPosValue.y >= target.minPosition.y) && (generatedPosValue.y <= target.maxPosition.y) &&
-                (generatedPosValue.z >= target.minPosition.z) && (generatedPosValue.z <= target.maxPosition.z))
-                &&
-                ((generatedRotValue.x >= target.minRotation.x) && (generatedRotValue.x <= target.maxRotation.x) &&
-                (generatedRotValue.y >= target.minRotation.y) && (generatedRotValue.y <= target.maxRotation.y) &&
-                (generatedRotValue.z >= target.minRotation.z) && (generatedRotValue.z <= target.maxRotation.z)))
-            {
-                result = true;
-            }
-            else
-            {
-                result = false;
-            }
-        }
-
-        return result;
-    }
-
-    Vector3 GeneratePosition(PoseCamera[] poseRange)
-    {
-        Vector3 hasilMin = Vector3.zero;
-        Vector3 hasilMax = Vector3.zero;
-        if (poseRange.Length != 1)
-        {
-            for (int i = 0; i < poseRange.Length; i++)
-            {
-                if ((i + 1 != poseRange.Length))
-                {
-                    hasilMin = Vector3.Min(poseRange[i].minPosition, poseRange[i + 1].minPosition);
-                    hasilMax = Vector3.Max(poseRange[i].maxPosition, poseRange[i + 1].maxPosition);
-                }
-            }
-        }
-        else
-        {
-            hasilMin = poseRange[0].minPosition;
-            hasilMax = poseRange[0].maxPosition;
-        }
-
-        float posX = Random.Range(hasilMin.x, hasilMax.x);
-        float posY = Random.Range(hasilMin.y, hasilMax.y);
-        float posZ = Random.Range(hasilMin.z, hasilMax.z);
-
-        Vector3 result = new Vector3(posX, posY, posZ);
-
-        //Debug.Log("Hasil Minimal Posisi = " + hasilMin);
-        //Debug.Log("Hasil Minimal Posisi = " + hasilMax);
-        //Debug.Log("Hasil Posisi Generated = " + result);
-        return result;
-    }
-
-    Vector3 GenerateRotation(PoseCamera[] poseRange)
-    {
-        Vector3 hasilMin = Vector3.zero;
-        Vector3 hasilMax = Vector3.zero;
-        if (poseRange.Length != 1)
-        {
-            for (int i = 0; i < poseRange.Length; i++)
-            {
-                if ((i + 1 != poseRange.Length))
-                {
-                    hasilMin = Vector3.Min(poseRange[i].minRotation, poseRange[i + 1].minRotation);
-                    hasilMax = Vector3.Max(poseRange[i].maxRotation, poseRange[i + 1].maxRotation);
-                }
-            }
-        }
-        else
-        {
-            hasilMin = poseRange[0].minRotation;
-            hasilMax = poseRange[0].maxRotation;
-        }
-
-        float posX = Random.Range(hasilMin.x, hasilMax.x);
-        float posY = Random.Range(hasilMin.y, hasilMax.y);
-        float posZ = Random.Range(hasilMin.z, hasilMax.z);
-
-        Vector3 result = new Vector3(posX, posY, posZ);
-
-        //Debug.Log("Hasil Minimal Rotasi = " + hasilMin);
-        //Debug.Log("Hasil Minimal Rotasi = " + hasilMax);
-        //Debug.Log("Hasil Rotasi Generated = " + result);
-        return result;
     }
 
     string BreakRule(string currId)
@@ -304,35 +159,4 @@ public class SmartCamMain : MonoBehaviour
         }
     }
 
-    //TruePoseCamera FindTruePose(string currId)
-    //{
-    //    TruePoseCamera result = DataCamera.poseFix[0];
-    //    for (int i = 0; i < DataCamera.poseFix.Length; i++)
-    //    {
-    //        if (currId == DataCamera.poseFix[i].identity)
-    //        {
-    //            result = DataCamera.poseFix[i];
-    //            break;
-    //        }
-    //    }
-    //    return result;
-    //}
-
-    //float FindDuration(string currId)
-    //{
-    //    float result = 0f;
-    //    for (int i = 0; i < DataCamera.poseFix.Length; i++)
-    //    {
-    //        if (currId == DataCamera.poseFix[i].identity)
-    //        {
-    //            result = DataCamera.poseFix[i].duration;
-    //            break;
-    //        }
-    //    }
-    //    return result;
-    //}
-    void OnAnimatorMove()
-    {
-
-    }
 }

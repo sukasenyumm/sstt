@@ -19,10 +19,10 @@ public class Genome{
     }
 
     //definisi gen binary
-    private bool[] binaryGenes;
-    public bool[] BinaryGenes
+    public bool[] binaryGenes;
+    public bool[] BinaryGenes()
     {
-        get { return binaryGenes; }
+        return binaryGenes; 
     }
     //definisi kamera yang dikunci
     private PoseCamera lockPose = new PoseCamera();
@@ -35,6 +35,32 @@ public class Genome{
         set
         {
             lockPose = value;
+        }
+    }
+
+    private PoseCamera[] poseRanges;
+    public PoseCamera[] PoseRanges
+    {
+        get
+        {
+            return poseRanges;
+        }
+        set
+        {
+            poseRanges = value;
+        }
+    }
+
+    private float duration = 0f;
+    public float Duration
+    {
+        get
+        {
+            return duration;
+        }
+        set
+        {
+            duration = value;
         }
     }
 
@@ -59,32 +85,45 @@ public class Genome{
             return fitness;
         }
     }
-	public Genome()
-    {
 
+    private static float mutationRate;
+    public static float MutationRate
+    {
+        get
+        {
+            return mutationRate;
+        }
+        set
+        {
+            mutationRate = value;
+        }
     }
 
     public Genome(string idPose)
     {
         CreateGenes(idPose);
+        CreateBinaryGenes();
+        ComputeObjectiveFunction();
     }
 
     public Genome(string idPose, bool createGenes)
     {
         poseId = idPose;
+        genes = new float[6];
+        binaryGenes = new bool[6];
         if (createGenes)
+        {
             CreateGenes(idPose);
+            CreateBinaryGenes();
+            ComputeObjectiveFunction();
+        }
     }
-    public Genome(ref float[] ggenes)
-    {
-        for (int i = 0; i < 6; i++)
-            genes[i] = ggenes[i];
-    }
+
     //Mulai buat Gen/Kromosom
     private void CreateGenes(string initialId)
     {
         PoseCamera[] poseRange = ChooseRule(initialId);
-    
+        poseRanges = poseRange;
         Vector3 hasilPosGenerated = GeneratePosition(poseRange);
         Vector3 hasilRotGenerated = GenerateRotation(poseRange);
         genes = new float[numLength]{hasilPosGenerated.x, hasilPosGenerated.y,hasilPosGenerated.z,
@@ -93,7 +132,7 @@ public class Genome{
 
         poseId = GetLockPoseId(initialId, poseRange);
         //poseId = lockedId;
-        CreateBinaryGenes();
+       
     }
 
     // Buat Gen berbentuk biner dari posisi yang sudah dilock terhadap posisi yang dipruning (a->b,c,d) <b,c,d adalah pilihan pruning>
@@ -205,7 +244,7 @@ public class Genome{
     //Dapatkan pose yang nantinya akan diLock berdasarkan id Pose yang diberikan
     string GetLockPoseId(string nameId, PoseCamera[] pose)
     {
-        int randomedLock = (int)Random.RandomRange(0f, (float)pose.Length);
+        int randomedLock = (int)Random.Range(0f, (float)pose.Length);
         string result="";
 
         for (int i = 0; i < pose.Length; i++)
@@ -214,6 +253,7 @@ public class Genome{
             {
                 lockPose = pose[i];
                 result = pose[i].identity;
+                duration = pose[i].duration;
             }
         }
 
@@ -233,14 +273,16 @@ public class Genome{
         objectiveResult = 6 - count;
         fitness = 1f / (objectiveResult + 1f);
     }
-
+    //Crossover
     public void Crossover(ref Genome genome2, out Genome child1, out Genome child2)
     {
         int pos = (int)(Random.value * 6);
         child1 = new Genome(genome2.PoseId, false);
         child2 = new Genome(genome2.PoseId, false);
-        child1.genes = new float[6];
-        child2.genes = new float[6];
+        child1.Duration = genome2.Duration;
+        child2.Duration = genome2.Duration;
+        child1.PoseRanges = genome2.PoseRanges;
+        child2.PoseRanges = genome2.PoseRanges;
 
         for (int i = 0; i < 6; i++)
         {
@@ -255,8 +297,29 @@ public class Genome{
                 child2.genes[i] = genes[i];
             }
         }
-    }
 
+        
+    }
+    //Mutasi
+    public void Mutate(int populationSize)
+    {
+        for (int pos = 0; pos < 6; pos++)
+        {
+            if (Random.value < mutationRate)
+            {
+                if(pos > 2 && (genes[pos] > 0.1f && genes[pos] < 0.2f))
+                genes[pos] = genes[pos] + (Random.Range(0f,360f) / ((float)populationSize * mutationRate * 0.1f));
+                else if(pos < 2 && (genes[pos] > 0.1f && genes[pos] < 0.2f))
+                genes[pos] = genes[pos] + (Random.value / ((float)populationSize * mutationRate * 0.1f));
+                else
+                {
+                    //do nothing
+                }
+            }
+               
+        }
+    }
+    // Dapatkan hasil gen
     public void GetValues(ref float[] values)
     {
         for (int i = 0; i < 6; i++)
