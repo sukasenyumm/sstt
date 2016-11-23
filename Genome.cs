@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 
 public class Genome{
 
@@ -124,8 +125,8 @@ public class Genome{
     {
         PoseCamera[] poseRange = ChooseRule(initialId);
         poseRanges = poseRange;
-        Vector3 hasilPosGenerated = GeneratePosition(poseRange);
-        Vector3 hasilRotGenerated = GenerateRotation(poseRange);
+        Vector3 hasilPosGenerated = GeneratePosition(poseRange); //new Vector3(Random.Range(-5f, 5), Random.Range(-5f, 5), Random.Range(-5f, 5));//GeneratePosition(poseRange);
+        Vector3 hasilRotGenerated = GenerateRotation(poseRange); //new Vector3(Random.Range(-360f, 360f), Random.Range(-360f, 360f), Random.Range(-360f, 360f)); //GenerateRotation(poseRange);
         genes = new float[numLength]{hasilPosGenerated.x, hasilPosGenerated.y,hasilPosGenerated.z,
                 hasilRotGenerated.x, hasilRotGenerated.y,hasilRotGenerated.z,
                 };
@@ -147,6 +148,7 @@ public class Genome{
 
         for (int i = 0; i < genes.Length;i++ )
         {
+           
             if (genes[i] >= fixedPoseMin[i] && genes[i] <= fixedPoseMax[i])
             {
                 binaryGenes[i] = true;
@@ -162,13 +164,18 @@ public class Genome{
     //Pilih aturan pruning
     PoseCamera[] ChooseRule(string currId)
     {
+        currId = currId.Remove(currId.Length - 1);
+        currId = Regex.Replace(currId, @"[\d-]", string.Empty);
         switch (currId)
         {
-            case "CU-D-AE": return DataCamera.poseRangeFromCUDAE;
-            case "MS-D-HA": return DataCamera.poseRangeFromMSDHA;
-            case "MS-D": return DataCamera.poseRangeFromMSD;
-            case "LS-D-HA": return DataCamera.poseRangeFromLSDHA;
-            default: return DataCamera.poseRangeFromCUDAE;
+            case "CUF": return DataCamera.poseRangeFromCUF;
+            case "MSF": return DataCamera.poseRangeFromMSF;
+            case "MSHAL": return DataCamera.poseRangeFromMSHAL;
+            case "MSHAR": return DataCamera.poseRangeFromMSHAR;
+            case "LSHAF": return DataCamera.poseRangeFromLSHAF;
+            case "MSHAF": return DataCamera.poseRangeFromMSHAF;
+            case "MSLAF": return DataCamera.poseRangeFromMSLAF;
+            default: return DataCamera.poseRangeFromCUF;
         }
 
     }

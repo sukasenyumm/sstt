@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.UI;
+using System.Text.RegularExpressions;
 
 public class SmartCamMain : MonoBehaviour
 {
@@ -9,8 +10,7 @@ public class SmartCamMain : MonoBehaviour
     private Animator anim;
     public Camera smartCam;
 
-    public string initialId = "CU-D-AE";
-    private int counterPain = 0;
+    public string initialId = "CU-F";
     private string counterId;
     public int poseTolerance = 2;
     public float duration = 2f;
@@ -39,11 +39,13 @@ public class SmartCamMain : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //Debug.Log(transform.forward);
         float[] values;
         float fitness;
         string id;
         Vector3 hasilPosGenerated = Vector3.zero;
         Vector3 hasilRotGenerated = Vector3.zero;
+        
         if (IsStandBy(anim))
         {
             duration -= Time.deltaTime;
@@ -88,7 +90,7 @@ public class SmartCamMain : MonoBehaviour
                                                                                          + "Fitness : "+fitness.ToString();
                 counterId = initialId;
                 
-                if (ts.Milliseconds > 50)
+                if (ts.Milliseconds >= 50)
                 {
                     GameObject.FindGameObjectWithTag("text pose").GetComponent<Text>().color = new Color(255, 0, 0);
                     initialId = BreakRule(initialId);
@@ -97,8 +99,10 @@ public class SmartCamMain : MonoBehaviour
                     GameObject.FindGameObjectWithTag("text pose").GetComponent<Text>().color = new Color(0, 253, 243);
 
                 smartCam.transform.rotation = Quaternion.Euler(hasilRotGenerated + transform.rotation.eulerAngles);
-                smartCam.transform.position = new Vector3(hasilPosGenerated.z * transform.forward.x, hasilPosGenerated.y, hasilPosGenerated.z * transform.forward.z) + transform.position;
-            
+              //  smartCam.transform.position = new Vector3(hasilPosGenerated.x + (hasilPosGenerated.z * transform.forward.x), hasilPosGenerated.y, hasilPosGenerated.z * transform.forward.z) + transform.position;
+                smartCam.transform.position = transform.position + (transform.rotation * hasilPosGenerated); 
+                
+
             }
            
         }
@@ -135,27 +139,20 @@ public class SmartCamMain : MonoBehaviour
         return res;
     }
 
-    PoseCamera[] ChooseRule(string currId)
-    {
-        switch (currId)
-        {
-            case "CU-D-AE": return DataCamera.poseRangeFromCUDAE;
-            case "MS-D-HA": return DataCamera.poseRangeFromMSDHA;
-            case "MS-D": return DataCamera.poseRangeFromMSD;
-            case "LS-D-HA": return DataCamera.poseRangeFromLSDHA;
-            default: return DataCamera.poseRangeFromCUDAE;
-        }
-    }
-
     string BreakRule(string currId)
     {
+        currId = currId.Remove(currId.Length - 1);
+        currId = Regex.Replace(currId, @"[\d-]", string.Empty);
         switch (currId)
         {
-            case "CU-D-AE": return DataCamera.poseRangeFromCUDAE[0].identity;
-            case "MS-D-HA": return DataCamera.poseRangeFromMSDHA[0].identity;
-            case "MS-D": return DataCamera.poseRangeFromMSD[0].identity;
-            case "LS-D-HA": return DataCamera.poseRangeFromLSDHA[0].identity;
-            default: return DataCamera.poseRangeFromCUDAE[0].identity;
+            case "CUF": return DataCamera.poseRangeFromCUF[0].identity;
+            case "MSF": return DataCamera.poseRangeFromMSF[0].identity;
+            case "MSHAL": return DataCamera.poseRangeFromMSHAL[0].identity;
+            case "MSHAR": return DataCamera.poseRangeFromMSHAR[0].identity;
+            case "LSHAF": return DataCamera.poseRangeFromLSHAF[0].identity;
+            case "MSHAF": return DataCamera.poseRangeFromMSHAF[0].identity;
+            case "MSLAF": return DataCamera.poseRangeFromMSLAF[0].identity;
+            default: return DataCamera.poseRangeFromCUF[0].identity;
         }
     }
 
