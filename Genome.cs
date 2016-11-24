@@ -164,19 +164,27 @@ public class Genome{
     //Pilih aturan pruning
     PoseCamera[] ChooseRule(string currId)
     {
-        currId = currId.Remove(currId.Length - 1);
         currId = Regex.Replace(currId, @"[\d-]", string.Empty);
+        PoseCamera[] result = DataCamera.poseRangeFromCUF;
+        //result.RandomShuffle();
         switch (currId)
         {
-            case "CUF": return DataCamera.poseRangeFromCUF;
-            case "MSF": return DataCamera.poseRangeFromMSF;
-            case "MSHAL": return DataCamera.poseRangeFromMSHAL;
-            case "MSHAR": return DataCamera.poseRangeFromMSHAR;
-            case "LSHAF": return DataCamera.poseRangeFromLSHAF;
-            case "MSHAF": return DataCamera.poseRangeFromMSHAF;
-            case "MSLAF": return DataCamera.poseRangeFromMSLAF;
-            default: return DataCamera.poseRangeFromCUF;
+            case "CUF": result = DataCamera.poseRangeFromCUF;
+                break;
+            case "MSF": result = DataCamera.poseRangeFromMSF;
+                break;
+            case "MSHAL": result = DataCamera.poseRangeFromMSHAL;
+                break;
+            case "LSHAF": result = DataCamera.poseRangeFromLSHAF;
+                break;
+            case "MSHAF": result = DataCamera.poseRangeFromMSHAF;
+                break;
+            case "MSLAF": result = DataCamera.poseRangeFromMSLAF;
+                break;
         }
+
+        result.RandomShuffle();
+        return result;
 
     }
 

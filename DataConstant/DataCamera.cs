@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 public class DataCamera
 {
+    
     public enum CAMSTATE { STILL, DYNAMIC };
     public static CAMSTATE SCSTATE = CAMSTATE.STILL;
 
@@ -81,7 +82,6 @@ public class DataCamera
                     new PoseCamera("CU-F7",new Vector3(0.16f, 1.38f, 0.33f), new Vector3(0.235f, 1.38f, 0.33f), new Vector3(0f, 180f, 0f), new Vector3(0f, 245f, 0f),4f),
                     new PoseCamera("CU-F8",new Vector3(0.236f, 1.38f, 0.33f), new Vector3(0.3f, 1.38f, 0.33f), new Vector3(0f, 187f, 0f), new Vector3(0f, 255f, 0f),4f),
                     new PoseCamera("LS-HA-F1",new Vector3(-1.8f, 1.81f, 2f), new Vector3(-1.51f, 1.81f, 2f), new Vector3(30f, 101f, 0f), new Vector3(30f, 180f, 0f),4f),
-                    new PoseCamera("LS-HA-F2",new Vector3(-1.5f, 1.81f, 2f), new Vector3(-1.21f, 1.81f, 2f), new Vector3(30f, 110f, 0f), new Vector3(30f, 184f, 0f),4f),
                     new PoseCamera("LS-HA-F3",new Vector3(-1.2f, 1.81f, 2f), new Vector3(-0.91f, 1.81f, 2f), new Vector3(30f, 118f, 0f), new Vector3(30f, 189f, 0f),4f),
                     new PoseCamera("LS-HA-F4",new Vector3(-0.9f, 1.81f, 2f), new Vector3(-0.61f, 1.81f, 2f), new Vector3(30f, 127f, 0f), new Vector3(30f, 194f, 0f),4f),
                     new PoseCamera("LS-HA-F5",new Vector3(-0.6f, 1.81f, 2f), new Vector3(-0.31f, 1.81f, 2f), new Vector3(30f, 136f, 0f), new Vector3(30f, 200f, 0f),4f),
@@ -91,31 +91,9 @@ public class DataCamera
                     new PoseCamera("LS-HA-F9",new Vector3(0.61f, 1.81f, 2f), new Vector3(0.9f, 1.81f, 2f), new Vector3(30f, 166f, 0f), new Vector3(30f, 233f, 0f),4f),
                     new PoseCamera("LS-HA-F10",new Vector3(0.91f, 1.81f, 2f), new Vector3(1.2f, 1.81f, 2f), new Vector3(30f, 171f, 0f), new Vector3(30f, 241f, 0f),4f),
                     new PoseCamera("LS-HA-F11",new Vector3(1.21f, 1.81f, 2f), new Vector3(1.5f, 1.81f, 2f), new Vector3(30f, 175f, 0f), new Vector3(30f, 252f, 0f),4f),
-                    new PoseCamera("LS-HA-F12",new Vector3(1.51f, 1.81f, 2f), new Vector3(1.8f, 1.81f, 2f), new Vector3(30f, 180f, 0f), new Vector3(30f, 258f, 0f),4f)
-                };
-
-    public static PoseCamera[] poseRangeFromMSHAR = new PoseCamera[20] {
-                    new PoseCamera("CU-F1",new Vector3(-0.3f, 1.38f, 0.33f), new Vector3(-0.236f, 1.38f, 0.33f), new Vector3(0f, 145f, 0f), new Vector3(0f, 200f, 0f),4f),
-                    new PoseCamera("CU-F2",new Vector3(-0.235f, 1.38f, 0.33f), new Vector3(-0.16f, 1.38f, 0.33f), new Vector3(0f, 135f, 0f), new Vector3(0f, 190f, 0f),4f),
-                    new PoseCamera("CU-F3",new Vector3(-0.15f, 1.38f, 0.33f), new Vector3(-0.076f, 1.38f, 0.33f), new Vector3(0f, 115f, 0f), new Vector3(0f, 175f, 0f),4f),
-                    new PoseCamera("CU-F4",new Vector3(-0.075f, 1.38f, 0.33f), new Vector3(0f, 1.38f, 0.33f), new Vector3(0f, 100f, 0f), new Vector3(0f, 175f, 0f),4f),
-                    new PoseCamera("CU-F5",new Vector3(0.01f, 1.38f, 0.33f), new Vector3(0.075f, 1.38f, 0.33f), new Vector3(0f, 155f, 0f), new Vector3(0f, 218f, 0f),4f),
-                    new PoseCamera("CU-F6",new Vector3(0.076f, 1.38f, 0.33f), new Vector3(0.15f, 1.38f, 0.33f), new Vector3(0f, 170f, 0f), new Vector3(0f, 230f, 0f),4f),
-                    new PoseCamera("CU-F7",new Vector3(0.16f, 1.38f, 0.33f), new Vector3(0.235f, 1.38f, 0.33f), new Vector3(0f, 180f, 0f), new Vector3(0f, 245f, 0f),4f),
-                    new PoseCamera("CU-F8",new Vector3(0.236f, 1.38f, 0.33f), new Vector3(0.3f, 1.38f, 0.33f), new Vector3(0f, 187f, 0f), new Vector3(0f, 255f, 0f),4f),
-                    new PoseCamera("LS-HA-F1",new Vector3(-1.8f, 1.81f, 2f), new Vector3(-1.51f, 1.81f, 2f), new Vector3(30f, 101f, 0f), new Vector3(30f, 180f, 0f),4f),
-                    new PoseCamera("LS-HA-F2",new Vector3(-1.5f, 1.81f, 2f), new Vector3(-1.21f, 1.81f, 2f), new Vector3(30f, 110f, 0f), new Vector3(30f, 184f, 0f),4f),
-                    new PoseCamera("LS-HA-F3",new Vector3(-1.2f, 1.81f, 2f), new Vector3(-0.91f, 1.81f, 2f), new Vector3(30f, 118f, 0f), new Vector3(30f, 189f, 0f),4f),
-                    new PoseCamera("LS-HA-F4",new Vector3(-0.9f, 1.81f, 2f), new Vector3(-0.61f, 1.81f, 2f), new Vector3(30f, 127f, 0f), new Vector3(30f, 194f, 0f),4f),
-                    new PoseCamera("LS-HA-F5",new Vector3(-0.6f, 1.81f, 2f), new Vector3(-0.31f, 1.81f, 2f), new Vector3(30f, 136f, 0f), new Vector3(30f, 200f, 0f),4f),
-                    new PoseCamera("LS-HA-F6",new Vector3(-0.3f, 1.81f, 2f), new Vector3(0f, 1.81f, 2f), new Vector3(30f, 150f, 0f), new Vector3(30f, 208f, 0f),4f),
-                    new PoseCamera("LS-HA-F7",new Vector3(0.01f, 1.81f, 2f), new Vector3(0.3f, 1.81f, 2f), new Vector3(30f, 152f, 0f), new Vector3(30f, 216f, 0f),4f),
-                    new PoseCamera("LS-HA-F8",new Vector3(0.31f, 1.81f, 2f), new Vector3(0.6f, 1.81f, 2f), new Vector3(30f, 159f, 0f), new Vector3(30f, 225f, 0f),4f),
-                    new PoseCamera("LS-HA-F9",new Vector3(0.61f, 1.81f, 2f), new Vector3(0.9f, 1.81f, 2f), new Vector3(30f, 166f, 0f), new Vector3(30f, 233f, 0f),4f),
-                    new PoseCamera("LS-HA-F10",new Vector3(0.91f, 1.81f, 2f), new Vector3(1.2f, 1.81f, 2f), new Vector3(30f, 171f, 0f), new Vector3(30f, 241f, 0f),4f),
-                    new PoseCamera("LS-HA-F11",new Vector3(1.21f, 1.81f, 2f), new Vector3(1.5f, 1.81f, 2f), new Vector3(30f, 175f, 0f), new Vector3(30f, 252f, 0f),4f),
-                    new PoseCamera("LS-HA-F12",new Vector3(1.51f, 1.81f, 2f), new Vector3(1.8f, 1.81f, 2f), new Vector3(30f, 180f, 0f), new Vector3(30f, 258f, 0f),4f)
-                };
+                    new PoseCamera("LS-HA-F12",new Vector3(1.51f, 1.81f, 2f), new Vector3(1.8f, 1.81f, 2f), new Vector3(30f, 180f, 0f), new Vector3(30f, 258f, 0f),4f),
+                new PoseCamera("LS-HA-F2",new Vector3(-1.5f, 1.81f, 2f), new Vector3(-1.21f, 1.81f, 2f), new Vector3(30f, 110f, 0f), new Vector3(30f, 184f, 0f),4f),
+                    };
 
     public static PoseCamera[] poseRangeFromLSHAF = new PoseCamera[24] {
                     new PoseCamera("MS-F1",new Vector3(-0.9f, 1.11f, 1f), new Vector3(-0.76f, 1.11f, 1f), new Vector3(0f, 105f, 0f), new Vector3(0f, 177f, 0f),4f),

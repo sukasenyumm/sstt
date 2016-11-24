@@ -91,6 +91,7 @@ public class SmartCamMain : MonoBehaviour
                 counterId = initialId;
                 
                 if (ts.Milliseconds >= 50)
+                //if (fitness < 1f)
                 {
                     GameObject.FindGameObjectWithTag("text pose").GetComponent<Text>().color = new Color(255, 0, 0);
                     initialId = BreakRule(initialId);
@@ -141,14 +142,13 @@ public class SmartCamMain : MonoBehaviour
 
     string BreakRule(string currId)
     {
-        currId = currId.Remove(currId.Length - 1);
+        //currId = currId.Remove(currId.Length - 1);
         currId = Regex.Replace(currId, @"[\d-]", string.Empty);
         switch (currId)
         {
             case "CUF": return DataCamera.poseRangeFromCUF[0].identity;
             case "MSF": return DataCamera.poseRangeFromMSF[0].identity;
             case "MSHAL": return DataCamera.poseRangeFromMSHAL[0].identity;
-            case "MSHAR": return DataCamera.poseRangeFromMSHAR[0].identity;
             case "LSHAF": return DataCamera.poseRangeFromLSHAF[0].identity;
             case "MSHAF": return DataCamera.poseRangeFromMSHAF[0].identity;
             case "MSLAF": return DataCamera.poseRangeFromMSLAF[0].identity;

@@ -235,6 +235,7 @@ public class GeneticAlgo  {
             child1.Mutate(populationSize);
             child2.Mutate(populationSize);
 
+            
             // aktifkan kembali semua property yg dibutuhkan setelah di clear 
             for (int k = 0; k < child1.PoseRanges.Length; k++)
             {
@@ -250,6 +251,7 @@ public class GeneticAlgo  {
                     child2.LockPose = child2.PoseRanges[k];
                 }
             }
+
 
             float[] fixedPoseMin = new float[6] { child1.LockPose.minPosition.x, child1.LockPose.minPosition.y, child1.LockPose.minPosition.z,
                                             child1.LockPose.minRotation.x, child1.LockPose.minRotation.y, child1.LockPose.minRotation.z};
@@ -289,7 +291,7 @@ public class GeneticAlgo  {
             //evaluasi kembali fungsi objektif
             child1.ComputeObjectiveFunction();
             child2.ComputeObjectiveFunction();
-
+            
             nextGeneration.Add(child1);
             nextGeneration.Add(child2);
         }
