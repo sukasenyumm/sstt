@@ -268,7 +268,7 @@ public class Genome{
             {
                 lockPose = pose[i];
                 result = pose[i].identity;
-                duration = pose[i].duration;
+                duration = Random.Range(pose[i].minduration,pose[i].maxduration);
             }
         }
 

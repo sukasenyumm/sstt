@@ -23,6 +23,9 @@ public class SmartCamMain : MonoBehaviour
     public float mutationRate = 0.05f;
     public float crossoverRate = 0.8f;
     public bool elitism = false;
+
+    private Vector3 hasilPosGenerated = Vector3.zero;
+    private Vector3 hasilRotGenerated = Vector3.zero;
              
     void Start()
     {
@@ -43,8 +46,7 @@ public class SmartCamMain : MonoBehaviour
         float[] values;
         float fitness;
         string id;
-        Vector3 hasilPosGenerated = Vector3.zero;
-        Vector3 hasilRotGenerated = Vector3.zero;
+        
         
         if (IsStandBy(anim))
         {
@@ -110,6 +112,8 @@ public class SmartCamMain : MonoBehaviour
         else
         {
             duration = -1f;
+            //smartCam.transform.rotation = Quaternion.Euler(hasilRotGenerated + transform.rotation.eulerAngles);
+            //smartCam.transform.position = transform.position + (transform.rotation * hasilPosGenerated); 
         }
 
        // Debug.Log(transform.forward);
