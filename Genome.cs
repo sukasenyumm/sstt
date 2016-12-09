@@ -7,11 +7,11 @@ public class Genome{
 
     private const int numLength = 6;
     //definisi pose ID sebelumnya
-    private string poseId;
-    public string PoseId
-    {
-        get { return poseId; }
-    }
+    //private string poseId;
+    //public string PoseId
+    //{
+    //    get { return poseId; }
+    //}
     //definisi gen posisi dan rotasi
     public float[] genes;
     public float[] Genes()
@@ -109,9 +109,10 @@ public class Genome{
 
     public Genome(string idPose, bool createGenes)
     {
-        poseId = idPose;
+        //poseId = idPose;
         genes = new float[6];
         binaryGenes = new bool[6];
+        LockPose.identity = idPose;
         if (createGenes)
         {
             CreateGenes(idPose);
@@ -131,7 +132,8 @@ public class Genome{
                 hasilRotGenerated.x, hasilRotGenerated.y,hasilRotGenerated.z,
                 };
 
-        poseId = GetLockPoseId(initialId, poseRange);
+        GetLockPoseId(poseRange);
+        //poseId = GetLockPoseId(initialId, poseRange);
         //poseId = lockedId;
        
     }
@@ -257,22 +259,19 @@ public class Genome{
     }
 
     //Dapatkan pose yang nantinya akan diLock berdasarkan id Pose yang diberikan
-    string GetLockPoseId(string nameId, PoseCamera[] pose)
+    void GetLockPoseId(PoseCamera[] pose)
     {
         int randomedLock = (int)Random.Range(0f, (float)pose.Length);
-        string result="";
-
-        for (int i = 0; i < pose.Length; i++)
-        {
-            if (i == (randomedLock))
-            {
-                lockPose = pose[i];
-                result = pose[i].identity;
-                duration = Random.Range(pose[i].minduration,pose[i].maxduration);
-            }
-        }
-
-        return result;
+        
+        //for (int i = 0; i < pose.Length; i++)
+        //{
+        //    if (i == (randomedLock + 1))
+        //    {
+        lockPose = pose[randomedLock];
+        duration = Random.Range(pose[randomedLock].minduration, pose[randomedLock].maxduration);
+        //        break;
+        //    }
+        //}
     }
 
     //Hitung hasil fungsi objektif setiap gen
@@ -292,8 +291,8 @@ public class Genome{
     public void Crossover(ref Genome genome2, out Genome child1, out Genome child2)
     {
         int pos = (int)(Random.value * 6);
-        child1 = new Genome(genome2.PoseId, false);
-        child2 = new Genome(genome2.PoseId, false);
+        child1 = new Genome(genome2.LockPose.identity, false);
+        child2 = new Genome(genome2.LockPose.identity, false);
         child1.Duration = genome2.Duration;
         child2.Duration = genome2.Duration;
         child1.PoseRanges = genome2.PoseRanges;

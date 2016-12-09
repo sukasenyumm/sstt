@@ -161,7 +161,7 @@ public class GeneticAlgo  {
                     {
                         float d = (float)((Genome)thisGeneration[j]).Fitness;
                         float[] kr = (float[])((Genome)thisGeneration[j]).Genes();
-                        string pose = (string)((Genome)thisGeneration[j]).PoseId;
+                        string pose = (string)((Genome)thisGeneration[j]).LockPose.identity;
                         outputFitness.WriteLine("Generation: {0},Genome: {1},[x: {2},y: {3},z: {4},rx: {5},ry: {6},rz: {7}],Pose id: {8} Fitness: {9}"
                             , i,j,kr[0],kr[1],kr[2],kr[3],kr[4],kr[5],pose, d);
                     }
@@ -192,6 +192,7 @@ public class GeneticAlgo  {
         for (int i = 0; i < populationSize; i++)
         {
             Genome g = ((Genome)thisGeneration[i]);
+            g.ComputeObjectiveFunction();
             totalFitness += g.Fitness;
         }
         thisGeneration.Sort(new GenomeComparer());
@@ -235,18 +236,17 @@ public class GeneticAlgo  {
             child1.Mutate(populationSize);
             child2.Mutate(populationSize);
 
-            
             // aktifkan kembali semua property yg dibutuhkan setelah di clear 
             for (int k = 0; k < child1.PoseRanges.Length; k++)
             {
-                if (child1.PoseRanges[k].identity == child1.PoseId)
+                if (child1.PoseRanges[k].identity == child1.LockPose.identity)
                 {
                     child1.LockPose = child1.PoseRanges[k];
                 }
             }
             for (int k = 0; k < child2.PoseRanges.Length; k++)
             {
-                if (child2.PoseRanges[k].identity == child2.PoseId)
+                if (child2.PoseRanges[k].identity == child2.LockPose.identity)
                 {
                     child2.LockPose = child2.PoseRanges[k];
                 }
@@ -338,7 +338,7 @@ public class GeneticAlgo  {
         values = new float[6];
         g.GetValues(ref values);
         fitness = g.Fitness;
-        idPose = g.PoseId;
+        idPose = g.LockPose.identity;
         duration = g.Duration;
     }
 }
