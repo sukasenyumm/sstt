@@ -132,7 +132,10 @@ public class Genome{
                 hasilRotGenerated.x, hasilRotGenerated.y,hasilRotGenerated.z,
                 };
 
-        GetLockPoseId(poseRange);
+        int index = poseRange.Length - 1;
+        lockPose = poseRange[index];
+        duration = Random.Range(poseRange[index].minduration, poseRange[index].maxduration);
+        //GetLockPoseId(poseRange);
         //poseId = GetLockPoseId(initialId, poseRange);
         //poseId = lockedId;
        
@@ -258,21 +261,6 @@ public class Genome{
         return result;
     }
 
-    //Dapatkan pose yang nantinya akan diLock berdasarkan id Pose yang diberikan
-    void GetLockPoseId(PoseCamera[] pose)
-    {
-        int randomedLock = (int)Random.Range(0f, (float)pose.Length);
-        
-        //for (int i = 0; i < pose.Length; i++)
-        //{
-        //    if (i == (randomedLock + 1))
-        //    {
-        lockPose = pose[randomedLock];
-        duration = Random.Range(pose[randomedLock].minduration, pose[randomedLock].maxduration);
-        //        break;
-        //    }
-        //}
-    }
 
     //Hitung hasil fungsi objektif setiap gen
     public void ComputeObjectiveFunction()

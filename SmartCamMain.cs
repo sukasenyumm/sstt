@@ -23,9 +23,13 @@ public class SmartCamMain : MonoBehaviour
     public float mutationRate = 0.05f;
     public float crossoverRate = 0.8f;
     public bool elitism = false;
-             
+    public Vector3 hasilPosGenerated;
+    public Vector3 hasilRotGenerated;
+    string temp = "";
+    
     void Start()
     {
+        
         anim = GetComponent<Animator>();
         counterId = initialId;
         tempduration = duration;
@@ -34,6 +38,8 @@ public class SmartCamMain : MonoBehaviour
                                                                                          + "Duration : " + duration + "\n"
                                                                                          + "Execution Time : -" + "\n"
                                                                                          + "Fitnes : -";
+        //GameObject.FindGameObjectWithTag("text pose").GetComponent<Text>().enabled = false;
+        //GameObject.FindGameObjectWithTag("text duration").GetComponent<Text>().enabled = false;
     }
 
     // Update is called once per frame
@@ -43,77 +49,96 @@ public class SmartCamMain : MonoBehaviour
         float[] values;
         float fitness;
         string id;
-        Vector3 hasilPosGenerated = Vector3.zero;
-        Vector3 hasilRotGenerated = Vector3.zero;
-        
-        
-        if (IsStandBy(anim))
+
+        if (Input.GetKeyDown(KeyCode.P))
         {
-            duration -= Time.deltaTime;
-            GameObject.FindGameObjectWithTag("text duration").GetComponent<Text>().text = "Current Duration : " + duration.ToString();
-            
-            if (duration <= 0)
+            GameObject.FindGameObjectWithTag("text pose").GetComponent<Text>().enabled = true;
+            GameObject.FindGameObjectWithTag("text duration").GetComponent<Text>().enabled = true;
+        }
+
+        if (Input.GetKeyDown(KeyCode.L))
+        {
+            GameObject.FindGameObjectWithTag("text pose").GetComponent<Text>().enabled = false;
+            GameObject.FindGameObjectWithTag("text duration").GetComponent<Text>().enabled = false;
+        }
+        
+        duration -= Time.deltaTime;
+        GameObject.FindGameObjectWithTag("text duration").GetComponent<Text>().text = "Duration : " + duration.ToString();
+
+        if (duration <= 0)
+        {
+            System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
+            stopWatch.Start();
+
+            GeneticAlgo GA = new GeneticAlgo(counterId);
+            GA.Generations = generations;
+            GA.MutationRate = mutationRate;
+            GA.CrossoverRate = crossoverRate;
+            GA.FitnessFile = @fitnessFile;
+            GA.Elitism = elitism;
+            GA.PopulationSize = populationSize; 
+            GA.Compute();
+
+            GA.GetBest(out values, out fitness, out id, out duration);
+
+            while (fitness != 1.0f)
             {
-                System.Diagnostics.Stopwatch stopWatch = new System.Diagnostics.Stopwatch();
-                stopWatch.Start();
-
-                GeneticAlgo GA = new GeneticAlgo(counterId);
-                GA.Generations = generations;
-                GA.MutationRate = mutationRate;
-                GA.CrossoverRate = crossoverRate;
-                GA.FitnessFile = @fitnessFile;
-                GA.Elitism = elitism;
-                GA.PopulationSize = populationSize; 
                 GA.Compute();
-
                 GA.GetBest(out values, out fitness, out id, out duration);
-
-                while (fitness != 1.0f)
-                {
-                    GA.Compute();
-                    GA.GetBest(out values, out fitness, out id, out duration);
-                }
-               
-                hasilPosGenerated = new Vector3(values[0], values[1], values[2]);
-                hasilRotGenerated = new Vector3(values[3], values[4], values[5]);
-               
-                initialId = id;
-
-                stopWatch.Stop();
-                System.TimeSpan ts = stopWatch.Elapsed;
-                executionTime = System.String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
-            ts.Hours, ts.Minutes, ts.Seconds,
-            ts.Milliseconds / 10);
-
-                GameObject.FindGameObjectWithTag("text pose").GetComponent<Text>().text = "Id Pose : " + initialId + "\n"
-                                                                                         + "Duration : " + duration + "\n"
-                                                                                         + "Execution Time : " + executionTime + "\n"
-                                                                                         + "Fitness : "+fitness.ToString();
-                counterId = initialId;
-                
-                if (ts.Milliseconds >= 50)
-                //if (fitness < 1f)
-                {
-                    GameObject.FindGameObjectWithTag("text pose").GetComponent<Text>().color = new Color(255, 0, 0);
-                    initialId = BreakRule(initialId);
-                }
-                else
-                    GameObject.FindGameObjectWithTag("text pose").GetComponent<Text>().color = new Color(0, 253, 243);
-
-                smartCam.transform.rotation = Quaternion.Euler(hasilRotGenerated + transform.rotation.eulerAngles);
-              //  smartCam.transform.position = new Vector3(hasilPosGenerated.x + (hasilPosGenerated.z * transform.forward.x), hasilPosGenerated.y, hasilPosGenerated.z * transform.forward.z) + transform.position;
-                smartCam.transform.position = transform.position + (transform.rotation * hasilPosGenerated); 
-                
-
             }
+
+            
            
+            hasilPosGenerated = new Vector3(values[0], values[1], values[2]);
+            hasilRotGenerated = new Vector3(values[3], values[4], values[5]);
+           
+            initialId = id;
+
+            stopWatch.Stop();
+            System.TimeSpan ts = stopWatch.Elapsed;
+            executionTime = System.String.Format("{0:00}:{1:00}:{2:00}.{3:00}",
+        ts.Hours, ts.Minutes, ts.Seconds,
+        ts.Milliseconds / 10);
+
+            GameObject.FindGameObjectWithTag("text pose").GetComponent<Text>().text = "Id Pose : " + initialId + "\n"
+                                                                                     + "Duration : " + duration + "\n"
+                                                                                     + "Execution Time : " + executionTime + "\n"
+                                                                                     + "Fitness : "+fitness.ToString();
+            counterId = initialId;
+            
+            if (ts.Milliseconds >= 50)
+            //if (fitness < 1f)
+            {
+                GameObject.FindGameObjectWithTag("text pose").GetComponent<Text>().color = new Color(255, 0, 0);
+                //initialId = BreakRule(initialId);
+            }
+            else
+                GameObject.FindGameObjectWithTag("text pose").GetComponent<Text>().color = new Color(0, 253, 243);
+
+            smartCam.transform.rotation = Quaternion.Euler(hasilRotGenerated + transform.rotation.eulerAngles);
+            smartCam.transform.position = transform.position + (transform.rotation * hasilPosGenerated);
+            temp = Regex.Replace(counterId, @"[\d-]", string.Empty);
+        }
+        
+        if (temp == "LSHAF")
+        {
+            if (Vector3.Distance(smartCam.transform.position, transform.position) > 1.5f  && IsStandBy(anim))
+            {
+                smartCam.transform.rotation = Quaternion.Euler(hasilRotGenerated + transform.rotation.eulerAngles);
+                smartCam.transform.position = Vector3.MoveTowards(smartCam.transform.position, transform.position + new Vector3(0,1.38f,0), 0.3f * Time.deltaTime); 
+            }
+            else
+            {
+                
+                smartCam.transform.rotation = Quaternion.Euler(hasilRotGenerated + transform.rotation.eulerAngles);
+                smartCam.transform.position = transform.position + (transform.rotation * hasilPosGenerated); 
+            }
         }
         else
         {
-            duration = -1f;
+            smartCam.transform.rotation = Quaternion.Euler(hasilRotGenerated + transform.rotation.eulerAngles);
+            smartCam.transform.position = transform.position + (transform.rotation * hasilPosGenerated); 
         }
-
-       // Debug.Log(transform.forward);
 
     }
 
@@ -139,22 +164,6 @@ public class SmartCamMain : MonoBehaviour
             }
         }
         return res;
-    }
-
-    string BreakRule(string currId)
-    {
-        //currId = currId.Remove(currId.Length - 1);
-        currId = Regex.Replace(currId, @"[\d-]", string.Empty);
-        switch (currId)
-        {
-            case "CUF": return DataCamera.poseRangeFromCUF[0].identity;
-            case "MSF": return DataCamera.poseRangeFromMSF[0].identity;
-            case "MSHAL": return DataCamera.poseRangeFromMSHAL[0].identity;
-            case "LSHAF": return DataCamera.poseRangeFromLSHAF[0].identity;
-            case "MSHAF": return DataCamera.poseRangeFromMSHAF[0].identity;
-            case "MSLAF": return DataCamera.poseRangeFromMSLAF[0].identity;
-            default: return DataCamera.poseRangeFromCUF[0].identity;
-        }
     }
 
 }
