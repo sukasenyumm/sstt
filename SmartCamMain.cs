@@ -10,7 +10,7 @@ public class SmartCamMain : MonoBehaviour
     private Animator anim;
     public Camera smartCam;
 
-    public string initialId = "CU-F";
+    private string initialId = "CU-F1";
     private string counterId;
     public int poseTolerance = 2;
     public float duration = 2f;
@@ -23,10 +23,12 @@ public class SmartCamMain : MonoBehaviour
     public float mutationRate = 0.05f;
     public float crossoverRate = 0.8f;
     public bool elitism = false;
+    public bool isMoveCamera;
     public Vector3 hasilPosGenerated;
     public Vector3 hasilRotGenerated;
     string temp = "";
     
+
     void Start()
     {
         
@@ -34,12 +36,10 @@ public class SmartCamMain : MonoBehaviour
         counterId = initialId;
         tempduration = duration;
         duration = tempduration;
-        GameObject.FindGameObjectWithTag("text pose").GetComponent<Text>().text = "Id Pose : " + initialId + "\n"
-                                                                                         + "Duration : " + duration + "\n"
-                                                                                         + "Execution Time : -" + "\n"
-                                                                                         + "Fitnes : -";
-        //GameObject.FindGameObjectWithTag("text pose").GetComponent<Text>().enabled = false;
-        //GameObject.FindGameObjectWithTag("text duration").GetComponent<Text>().enabled = false;
+        GameObject.FindGameObjectWithTag("text pose").GetComponent<Text>().text = "Press 'L' to hide camera information"+"\n"+
+        "Press 'I' to display camera information" + "\n" +
+        "Press 'M' to enable camera movement" + "\n" +
+        "Press 'N' to disable camera movement";
     }
 
     // Update is called once per frame
@@ -50,20 +50,15 @@ public class SmartCamMain : MonoBehaviour
         float fitness;
         string id;
 
-        if (Input.GetKeyDown(KeyCode.P))
-        {
-            GameObject.FindGameObjectWithTag("text pose").GetComponent<Text>().enabled = true;
-            GameObject.FindGameObjectWithTag("text duration").GetComponent<Text>().enabled = true;
-        }
-
-        if (Input.GetKeyDown(KeyCode.L))
-        {
-            GameObject.FindGameObjectWithTag("text pose").GetComponent<Text>().enabled = false;
-            GameObject.FindGameObjectWithTag("text duration").GetComponent<Text>().enabled = false;
-        }
+        KeyControl();
         
         duration -= Time.deltaTime;
-        GameObject.FindGameObjectWithTag("text duration").GetComponent<Text>().text = "Duration : " + duration.ToString();
+        GameObject.FindGameObjectWithTag("text duration").GetComponent<Text>().text = "Elapsed Duration : " + duration.ToString() + "\n"+
+                                                                                      "Camera Movement Status : " + isMoveCamera.ToString() + "\n" + 
+                                                                                      "Press 'L' to hide camera information" + "\n" +
+                                                                                      "Press 'I' to display camera information" + "\n" +
+                                                                                      "Press 'M' to enable camera movement" + "\n" +
+                                                                                      "Press 'N' to disable camera movement";
 
         if (duration <= 0)
         {
@@ -87,8 +82,6 @@ public class SmartCamMain : MonoBehaviour
                 GA.GetBest(out values, out fitness, out id, out duration);
             }
 
-            
-           
             hasilPosGenerated = new Vector3(values[0], values[1], values[2]);
             hasilRotGenerated = new Vector3(values[3], values[4], values[5]);
            
@@ -107,10 +100,8 @@ public class SmartCamMain : MonoBehaviour
             counterId = initialId;
             
             if (ts.Milliseconds >= 50)
-            //if (fitness < 1f)
             {
                 GameObject.FindGameObjectWithTag("text pose").GetComponent<Text>().color = new Color(255, 0, 0);
-                //initialId = BreakRule(initialId);
             }
             else
                 GameObject.FindGameObjectWithTag("text pose").GetComponent<Text>().color = new Color(0, 253, 243);
@@ -119,29 +110,75 @@ public class SmartCamMain : MonoBehaviour
             smartCam.transform.position = transform.position + (transform.rotation * hasilPosGenerated);
             temp = Regex.Replace(counterId, @"[\d-]", string.Empty);
         }
-        
-        if (temp == "LSHAF")
+
+        if (isMoveCamera)
         {
-            if (Vector3.Distance(smartCam.transform.position, transform.position) > 1.5f  && IsStandBy(anim))
+            if (temp == "LSHAF")
             {
-                smartCam.transform.rotation = Quaternion.Euler(hasilRotGenerated + transform.rotation.eulerAngles);
-                smartCam.transform.position = Vector3.MoveTowards(smartCam.transform.position, transform.position + new Vector3(0,1.38f,0), 0.3f * Time.deltaTime); 
+                if (Vector3.Distance(smartCam.transform.position, transform.position) > 1.5f && IsStandBy(anim))
+                {
+                    smartCam.transform.rotation = Quaternion.Euler(hasilRotGenerated + transform.rotation.eulerAngles);
+                    smartCam.transform.position = Vector3.MoveTowards(smartCam.transform.position, transform.position + new Vector3(0, 1.38f, 0), 0.3f * Time.deltaTime);
+                }
+                else
+                {
+
+                    smartCam.transform.rotation = Quaternion.Euler(hasilRotGenerated + transform.rotation.eulerAngles);
+                    smartCam.transform.position = transform.position + (transform.rotation * hasilPosGenerated);
+                }
+            }
+            else if (temp == "MSHAF")
+            {
+                if (Vector3.Distance(smartCam.transform.position, transform.position) > 0.5f && IsStandBy(anim))
+                {
+                    smartCam.transform.rotation = Quaternion.Euler(hasilRotGenerated + transform.rotation.eulerAngles);
+                    smartCam.transform.position = Vector3.MoveTowards(smartCam.transform.position, transform.position + new Vector3(0, 1.38f, 0), -0.3f * Time.deltaTime);
+                }
+                else
+                {
+
+                    smartCam.transform.rotation = Quaternion.Euler(hasilRotGenerated + transform.rotation.eulerAngles);
+                    smartCam.transform.position = transform.position + (transform.rotation * hasilPosGenerated);
+                }
             }
             else
             {
-                
                 smartCam.transform.rotation = Quaternion.Euler(hasilRotGenerated + transform.rotation.eulerAngles);
-                smartCam.transform.position = transform.position + (transform.rotation * hasilPosGenerated); 
+                smartCam.transform.position = transform.position + (transform.rotation * hasilPosGenerated);
             }
         }
         else
         {
             smartCam.transform.rotation = Quaternion.Euler(hasilRotGenerated + transform.rotation.eulerAngles);
-            smartCam.transform.position = transform.position + (transform.rotation * hasilPosGenerated); 
+            smartCam.transform.position = transform.position + (transform.rotation * hasilPosGenerated);
         }
 
     }
 
+    void KeyControl()
+    {
+        if (Input.GetKeyDown(KeyCode.I))
+        {
+            GameObject.FindGameObjectWithTag("text pose").GetComponent<Text>().enabled = true;
+            GameObject.FindGameObjectWithTag("text duration").GetComponent<Text>().enabled = true;
+        }
+
+        if (Input.GetKeyDown(KeyCode.L))
+        {
+            GameObject.FindGameObjectWithTag("text pose").GetComponent<Text>().enabled = false;
+            GameObject.FindGameObjectWithTag("text duration").GetComponent<Text>().enabled = false;
+        }
+
+        if (Input.GetKeyDown(KeyCode.M))
+        {
+            isMoveCamera = true;
+        }
+
+        if (Input.GetKeyDown(KeyCode.N))
+        {
+            isMoveCamera = false;
+        }
+    }
     bool IsStandBy(Animator an)
     {
         bool res = false;
@@ -150,8 +187,7 @@ public class SmartCamMain : MonoBehaviour
             float fr = an.GetFloat("Forward");
             bool isGround = an.GetBool("OnGround");
             float tr = an.GetFloat("Turn");
-            //Debug.Log(fr);
-
+            
             if (fr > -0.01f && fr < 0.01f && isGround && tr > -0.01f && tr < 0.01f)
             {
                 res = true;
