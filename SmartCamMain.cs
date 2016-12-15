@@ -113,33 +113,63 @@ public class SmartCamMain : MonoBehaviour
 
         if (isMoveCamera)
         {
-            if (temp == "LSHAF")
-            {
-                if (Vector3.Distance(smartCam.transform.position, transform.position) > 1.5f && IsStandBy(anim))
-                {
-                    smartCam.transform.rotation = Quaternion.Euler(hasilRotGenerated + transform.rotation.eulerAngles);
-                    smartCam.transform.position = Vector3.MoveTowards(smartCam.transform.position, transform.position + new Vector3(0, 1.38f, 0), 0.3f * Time.deltaTime);
-                }
-                else
-                {
+            CameraMovementPose();
+        }
+        else
+        {
+            smartCam.transform.rotation = Quaternion.Euler(hasilRotGenerated + transform.rotation.eulerAngles);
+            smartCam.transform.position = transform.position + (transform.rotation * hasilPosGenerated);
+        }
 
-                    smartCam.transform.rotation = Quaternion.Euler(hasilRotGenerated + transform.rotation.eulerAngles);
-                    smartCam.transform.position = transform.position + (transform.rotation * hasilPosGenerated);
-                }
+    }
+    void CameraMovementPose()
+    {
+        if (temp == "LSHAF")
+        {
+            if (Vector3.Distance(smartCam.transform.position, transform.position) > 1.5f && IsStandBy(anim))
+            {
+                smartCam.transform.rotation = Quaternion.Euler(hasilRotGenerated + transform.rotation.eulerAngles);
+                smartCam.transform.position = Vector3.MoveTowards(smartCam.transform.position, transform.position + new Vector3(0, 1.38f, 0), 0.3f * Time.deltaTime);
             }
-            else if (temp == "MSHAF")
+            else
             {
-                if (Vector3.Distance(smartCam.transform.position, transform.position) > 0.5f && IsStandBy(anim))
-                {
-                    smartCam.transform.rotation = Quaternion.Euler(hasilRotGenerated + transform.rotation.eulerAngles);
-                    smartCam.transform.position = Vector3.MoveTowards(smartCam.transform.position, transform.position + new Vector3(0, 1.38f, 0), -0.3f * Time.deltaTime);
-                }
-                else
-                {
+                smartCam.transform.rotation = Quaternion.Euler(hasilRotGenerated + transform.rotation.eulerAngles);
+                smartCam.transform.position = transform.position + (transform.rotation * hasilPosGenerated);
+            }
+        }
+        else if (temp == "MSHAF")
+        {
+            if (Vector3.Distance(smartCam.transform.position, transform.position) > 0.5f && IsStandBy(anim))
+            {
+                smartCam.transform.rotation = Quaternion.Euler(hasilRotGenerated + transform.rotation.eulerAngles);
+                smartCam.transform.position = Vector3.MoveTowards(smartCam.transform.position, transform.position + new Vector3(0, 1.38f, 0), -0.3f * Time.deltaTime);
+            }
+            else
+            {
 
-                    smartCam.transform.rotation = Quaternion.Euler(hasilRotGenerated + transform.rotation.eulerAngles);
-                    smartCam.transform.position = transform.position + (transform.rotation * hasilPosGenerated);
-                }
+                smartCam.transform.rotation = Quaternion.Euler(hasilRotGenerated + transform.rotation.eulerAngles);
+                smartCam.transform.position = transform.position + (transform.rotation * hasilPosGenerated);
+            }
+        }
+        else if (temp == "MSL")
+        {
+            if (smartCam.transform.position.x <= 1f && IsStandBy(anim))
+            {
+                smartCam.transform.LookAt(transform.position + new Vector3(0, 1.31f, 0));
+                smartCam.transform.RotateAround(transform.position, Vector3.up, 15f * Time.deltaTime);
+            }
+            else
+            {
+                smartCam.transform.rotation = Quaternion.Euler(hasilRotGenerated + transform.rotation.eulerAngles);
+                smartCam.transform.position = transform.position + (transform.rotation * hasilPosGenerated);
+            }
+        }
+        else if (temp == "MSR")
+        {
+            if (smartCam.transform.position.x >= -1f && IsStandBy(anim))
+            {
+                smartCam.transform.LookAt(transform.position + new Vector3(0, 1.31f, 0));
+                smartCam.transform.RotateAround(transform.position, Vector3.down, 15f * Time.deltaTime);
             }
             else
             {
@@ -152,7 +182,6 @@ public class SmartCamMain : MonoBehaviour
             smartCam.transform.rotation = Quaternion.Euler(hasilRotGenerated + transform.rotation.eulerAngles);
             smartCam.transform.position = transform.position + (transform.rotation * hasilPosGenerated);
         }
-
     }
 
     void KeyControl()

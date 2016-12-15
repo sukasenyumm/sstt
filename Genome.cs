@@ -1,7 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using System.Text.RegularExpressions;
 
 public class Genome{
 
@@ -124,7 +123,7 @@ public class Genome{
     //Mulai buat Gen/Kromosom
     private void CreateGenes(string initialId)
     {
-        PoseCamera[] poseRange = ChooseRule(initialId);
+        PoseCamera[] poseRange = DataCamera.ChooseRule(initialId);
         poseRanges = poseRange;
         Vector3 hasilPosGenerated = GeneratePosition(poseRange); //new Vector3(Random.Range(-5f, 5), Random.Range(-5f, 5), Random.Range(-5f, 5));//GeneratePosition(poseRange);
         Vector3 hasilRotGenerated = GenerateRotation(poseRange); //new Vector3(Random.Range(-360f, 360f), Random.Range(-360f, 360f), Random.Range(-360f, 360f)); //GenerateRotation(poseRange);
@@ -166,32 +165,7 @@ public class Genome{
             
     }
 
-    //Pilih aturan pruning
-    PoseCamera[] ChooseRule(string currId)
-    {
-        currId = Regex.Replace(currId, @"[\d-]", string.Empty);
-        PoseCamera[] result = DataCamera.poseRangeFromCUF;
-        //result.RandomShuffle();
-        switch (currId)
-        {
-            case "CUF": result = DataCamera.poseRangeFromCUF;
-                break;
-            case "MSF": result = DataCamera.poseRangeFromMSF;
-                break;
-            case "MSHAL": result = DataCamera.poseRangeFromMSHAL;
-                break;
-            case "LSHAF": result = DataCamera.poseRangeFromLSHAF;
-                break;
-            case "MSHAF": result = DataCamera.poseRangeFromMSHAF;
-                break;
-            case "MSLAF": result = DataCamera.poseRangeFromMSLAF;
-                break;
-        }
-
-        result.RandomShuffle();
-        return result;
-
-    }
+   
 
     //Generate posisi random berdasarkan min/max range dari pruning
     Vector3 GeneratePosition(PoseCamera[] poseRange)
