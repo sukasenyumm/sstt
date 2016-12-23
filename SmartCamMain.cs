@@ -7,7 +7,6 @@ using System.Text.RegularExpressions;
 public class SmartCamMain : MonoBehaviour
 {
 
-    private Animator anim;
     public Camera smartCam;
 
     private string initialId = "CU-F1";
@@ -19,20 +18,22 @@ public class SmartCamMain : MonoBehaviour
 
     public string fitnessFile = "";
     public int generations = 20;
-    public int populationSize = 20; 
+    public int populationSize = 20;
     public float mutationRate = 0.05f;
     public float crossoverRate = 0.8f;
     public bool elitism = false;
     public bool isMoveCamera;
+    public bool isFollowCamera;
     public Vector3 hasilPosGenerated;
     public Vector3 hasilRotGenerated;
+    public float CameraDistance = 3f; // if datacamera.cs changed, replace 5f with larger than 5f..
     string temp = "";
+    bool isZoom;
     
 
     void Start()
     {
         
-        anim = GetComponent<Animator>();
         counterId = initialId;
         tempduration = duration;
         duration = tempduration;
@@ -51,14 +52,13 @@ public class SmartCamMain : MonoBehaviour
         string id;
 
         KeyControl();
-        
+
         duration -= Time.deltaTime;
-        GameObject.FindGameObjectWithTag("text duration").GetComponent<Text>().text = "Elapsed Duration : " + duration.ToString() + "\n"+
-                                                                                      "Camera Movement Status : " + isMoveCamera.ToString() + "\n" + 
-                                                                                      "Press 'L' to hide camera information" + "\n" +
-                                                                                      "Press 'I' to display camera information" + "\n" +
-                                                                                      "Press 'M' to enable camera movement" + "\n" +
-                                                                                      "Press 'N' to disable camera movement";
+        GameObject.FindGameObjectWithTag("text duration").GetComponent<Text>().text = "Elapsed Duration : " + duration.ToString() + "\n" +
+        "Camera Movement Status : " + isMoveCamera.ToString() + "\n" +
+        "Camera Follow Status : " + isFollowCamera.ToString() + "\n" +
+        "Press 'L' to hide camera information" + "\n" +
+        "Press 'I' to display camera information" + "\n";
 
         if (duration <= 0)
         {
@@ -71,10 +71,16 @@ public class SmartCamMain : MonoBehaviour
             GA.CrossoverRate = crossoverRate;
             GA.FitnessFile = @fitnessFile;
             GA.Elitism = elitism;
-            GA.PopulationSize = populationSize; 
+            GA.PopulationSize = populationSize;
             GA.Compute();
 
             GA.GetBest(out values, out fitness, out id, out duration);
+
+            isMoveCamera = (Random.value > 0.5f) ? true : false;
+            isFollowCamera = (Random.value > 0.5f) ? true : false;
+
+            if (!isFollowCamera)
+                isMoveCamera = false;
 
             while (fitness != 1.0f)
             {
@@ -84,7 +90,7 @@ public class SmartCamMain : MonoBehaviour
 
             hasilPosGenerated = new Vector3(values[0], values[1], values[2]);
             hasilRotGenerated = new Vector3(values[3], values[4], values[5]);
-           
+
             initialId = id;
 
             stopWatch.Stop();
@@ -96,9 +102,9 @@ public class SmartCamMain : MonoBehaviour
             GameObject.FindGameObjectWithTag("text pose").GetComponent<Text>().text = "Id Pose : " + initialId + "\n"
                                                                                      + "Duration : " + duration + "\n"
                                                                                      + "Execution Time : " + executionTime + "\n"
-                                                                                     + "Fitness : "+fitness.ToString();
+                                                                                     + "Fitness : " + fitness.ToString();
             counterId = initialId;
-            
+
             if (ts.Milliseconds >= 50)
             {
                 GameObject.FindGameObjectWithTag("text pose").GetComponent<Text>().color = new Color(255, 0, 0);
@@ -108,79 +114,97 @@ public class SmartCamMain : MonoBehaviour
 
             smartCam.transform.rotation = Quaternion.Euler(hasilRotGenerated + transform.rotation.eulerAngles);
             smartCam.transform.position = transform.position + (transform.rotation * hasilPosGenerated);
+            if (isFollowCamera)
+                smartCam.transform.parent = transform;
+            else
+                smartCam.transform.parent = null;
             temp = Regex.Replace(counterId, @"[\d-]", string.Empty);
+            if (temp == "MSF")
+                isZoom = Random.value > 0.5f ? true : false;
         }
 
         if (isMoveCamera)
         {
             CameraMovementPose();
         }
-        else
-        {
-            smartCam.transform.rotation = Quaternion.Euler(hasilRotGenerated + transform.rotation.eulerAngles);
-            smartCam.transform.position = transform.position + (transform.rotation * hasilPosGenerated);
-        }
 
+        var screenPoint = Vector3.Distance(smartCam.transform.position, transform.position);
+        if (screenPoint > CameraDistance)
+        {
+            if (!isFollowCamera)
+            {
+                if (duration > 1f)
+                {
+                    smartCam.transform.LookAt(transform);
+                    duration = duration - Time.deltaTime * 1f;
+                }
+            }
+        }
     }
     void CameraMovementPose()
     {
+
         if (temp == "LSHAF")
         {
-            if (Vector3.Distance(smartCam.transform.position, transform.position) > 1.5f && IsStandBy(anim))
+            //zoom in
+            if (Vector3.Distance(smartCam.transform.position, transform.position) > 1.5f)
             {
                 smartCam.transform.rotation = Quaternion.Euler(hasilRotGenerated + transform.rotation.eulerAngles);
                 smartCam.transform.position = Vector3.MoveTowards(smartCam.transform.position, transform.position + new Vector3(0, 1.38f, 0), 0.3f * Time.deltaTime);
             }
-            else
-            {
-                smartCam.transform.rotation = Quaternion.Euler(hasilRotGenerated + transform.rotation.eulerAngles);
-                smartCam.transform.position = transform.position + (transform.rotation * hasilPosGenerated);
-            }
+
         }
-        else if (temp == "MSHAF")
+        else if (temp == "CUF")
         {
-            if (Vector3.Distance(smartCam.transform.position, transform.position) > 0.5f && IsStandBy(anim))
+            //zoom out
+            if (Vector3.Distance(smartCam.transform.position, transform.position) > 0.5f)
             {
                 smartCam.transform.rotation = Quaternion.Euler(hasilRotGenerated + transform.rotation.eulerAngles);
                 smartCam.transform.position = Vector3.MoveTowards(smartCam.transform.position, transform.position + new Vector3(0, 1.38f, 0), -0.3f * Time.deltaTime);
             }
+
+        }
+        else if (temp == "MSF")
+        {
+            if (isZoom)
+            {
+                //zoom in
+                if (Vector3.Distance(smartCam.transform.position, transform.position) > 1.4f)
+                {
+                    smartCam.transform.rotation = Quaternion.Euler(hasilRotGenerated + transform.rotation.eulerAngles);
+                    smartCam.transform.position = Vector3.MoveTowards(smartCam.transform.position, transform.position + new Vector3(0, 1.38f, 0), 0.3f * Time.deltaTime);
+                }
+            }
             else
             {
-
-                smartCam.transform.rotation = Quaternion.Euler(hasilRotGenerated + transform.rotation.eulerAngles);
-                smartCam.transform.position = transform.position + (transform.rotation * hasilPosGenerated);
+                //zoom out
+                if (Vector3.Distance(smartCam.transform.position, transform.position) > 0.5f)
+                {
+                    smartCam.transform.rotation = Quaternion.Euler(hasilRotGenerated + transform.rotation.eulerAngles);
+                    smartCam.transform.position = Vector3.MoveTowards(smartCam.transform.position, transform.position + new Vector3(0, 1.38f, 0), -0.3f * Time.deltaTime);
+                }
             }
+
         }
         else if (temp == "MSL")
         {
-            if (smartCam.transform.position.x <= 1f && IsStandBy(anim))
+            //left-to-right
+            if (smartCam.transform.position.x <= 1f)
             {
                 smartCam.transform.LookAt(transform.position + new Vector3(0, 1.31f, 0));
                 smartCam.transform.RotateAround(transform.position, Vector3.up, 15f * Time.deltaTime);
             }
-            else
-            {
-                smartCam.transform.rotation = Quaternion.Euler(hasilRotGenerated + transform.rotation.eulerAngles);
-                smartCam.transform.position = transform.position + (transform.rotation * hasilPosGenerated);
-            }
+
         }
         else if (temp == "MSR")
         {
-            if (smartCam.transform.position.x >= -1f && IsStandBy(anim))
+            //right-to-left
+            if (smartCam.transform.position.x >= -1f)
             {
                 smartCam.transform.LookAt(transform.position + new Vector3(0, 1.31f, 0));
                 smartCam.transform.RotateAround(transform.position, Vector3.down, 15f * Time.deltaTime);
             }
-            else
-            {
-                smartCam.transform.rotation = Quaternion.Euler(hasilRotGenerated + transform.rotation.eulerAngles);
-                smartCam.transform.position = transform.position + (transform.rotation * hasilPosGenerated);
-            }
-        }
-        else
-        {
-            smartCam.transform.rotation = Quaternion.Euler(hasilRotGenerated + transform.rotation.eulerAngles);
-            smartCam.transform.position = transform.position + (transform.rotation * hasilPosGenerated);
+
         }
     }
 
@@ -197,38 +221,6 @@ public class SmartCamMain : MonoBehaviour
             GameObject.FindGameObjectWithTag("text pose").GetComponent<Text>().enabled = false;
             GameObject.FindGameObjectWithTag("text duration").GetComponent<Text>().enabled = false;
         }
-
-        if (Input.GetKeyDown(KeyCode.M))
-        {
-            isMoveCamera = true;
-        }
-
-        if (Input.GetKeyDown(KeyCode.N))
-        {
-            isMoveCamera = false;
-        }
-    }
-    bool IsStandBy(Animator an)
-    {
-        bool res = false;
-        if (an)
-        {
-            float fr = an.GetFloat("Forward");
-            bool isGround = an.GetBool("OnGround");
-            float tr = an.GetFloat("Turn");
-            
-            if (fr > -0.01f && fr < 0.01f && isGround && tr > -0.01f && tr < 0.01f)
-            {
-                res = true;
-                //Debug.Log("Idle");
-            }
-            else
-            {
-                res = false;
-                //Debug.Log("Move");
-            }
-        }
-        return res;
     }
 
 }
